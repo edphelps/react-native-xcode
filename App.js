@@ -17,6 +17,42 @@ const instructions = Platform.select({
 });
 
 /* ********************************************
+*  Format 5 to $5.00
+*********************************************** */
+function formatDollars(dollars) {
+  return `$${dollars}.00`;
+}
+
+/* ********************************************
+*  Cart
+*********************************************** */
+const Cart = ({ books }) => {
+  console.log("-- Cart::render()");
+
+  if (!books)
+    return (
+      <Text>loading...</Text>
+    );
+
+  const grandTotal = books.reduce((total, book) => {
+    return total += (book.inCart) ? book.price : 0;
+  }, 0);
+  return (
+    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+
+      <View>
+        <Text style={styles.cartTitle}>Cart</Text>
+      </View>
+
+      <View style={styles.cartTotalContainer}>
+        <Text style={styles.cartTotal}>Cart total: {formatDollars(grandTotal)}</Text>
+      </View>
+
+    </View>
+  );
+};
+
+/* ********************************************
 *  BookList
    Displays list of books that match the search criteria and aren't in the cart
    books -- see App state
@@ -24,15 +60,24 @@ const instructions = Platform.select({
    addToCartCB -- callback when user clicks to add book to cart, pass the book__id
 }
 *********************************************** */
-const BookList = ({ books, searchCriteria, addToCartCB }) => {
+const BookList = ({ books, searchCriteria, addToCartCB, removeFromCartCB }) => {
 
   /* **********************************
-  *  render()
+  *  onPressBuy()
   ************************************* */
   onPressBuy = (e, id) => {
     console.log('----------------------');
     console.log('onOPressBuy, id:', id);
     addToCartCB(id);
+  }
+
+  /* **********************************
+  *  onPressReturn()
+  ************************************* */
+  onPressReturn = (e, id) => {
+    console.log('----------------------');
+    console.log('onOPressReturn, id:', id);
+    removeFromCartCB(id);
   }
 
   /* **********************************
@@ -55,10 +100,14 @@ const BookList = ({ books, searchCriteria, addToCartCB }) => {
         data={books}
         renderItem={({item}) => (
           <View style={{flex: 1, flexDirection: 'row'}}>
-            <Button onPress={(e) => onPressBuy(e, item.id)} title="Buy"/>
+            {(item.inCart)
+              ? (<Button onPress={(e) => onPressReturn(e, item.id)} color="#000000" title="---"/>)
+              : (<Button onPress={(e) => onPressBuy(e, item.id)} color="#000099" title="Buy"/>)}
+
             <Text style={styles.item}>{item.title}</Text>
           </View>
         )}
+        keyExtractor={(item, index) => Number(item.id).toString()}
       />
     </View>
   );
@@ -160,8 +209,23 @@ export default class App extends Component<Props> {
     const response = await fetch('http://localhost:8082/api/books');
     const json = await response.json();
     console.log("****** books loaded", json)
+
+    let books = [...json];
+    // json.forEach((book) => {
+    //   newBook = {...book};
+    //   newBook.id += 20;
+    //   newBook.title = '2 ' + book.title;
+    //   books.unshift(newBook);
+    //   });
+    // json.forEach((book) => {
+    //   newBook = {...book};
+    //   newBook.id += 40;
+    //   newBook.title = '3 ' + book.title;
+    //   books.unshift(newBook);
+    //   });
+
     this.setState({
-      books: json,
+      books: books,
     });
   }
 
@@ -195,6 +259,26 @@ export default class App extends Component<Props> {
   }
 
   /* **********************************
+  *  removeFromCart()
+  *  Called when user clicks to remove a book from the cart
+  *  id -- book id
+  ************************************* */
+  removeFromCart = async (id) => {
+    console.log('App:removeFromart()');
+    const response = await fetch(`http://localhost:8082/api/books/cart/remove/${id}`, {
+      method: 'PATCH',
+      body: '',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
+    const json = await response.json();
+    console.log('resulting json: ' + json);
+    this.loadBooks();
+  }
+
+  /* **********************************
   *  render
   ************************************* */
   render() {
@@ -202,38 +286,65 @@ export default class App extends Component<Props> {
     return (
       <View style={styles.container}>
 
-        <View style={{height: 100, backgroundColor: 'powderblue'}}>
-          <Text style={styles.heading}>Bookstore 1</Text>
+        {/* Title */}
+        <View style={{height: 100, backgroundColor: '#0066ff'}}>
+          <Text style={styles.title}>Bookstore</Text>
         </View>
 
-        <BookList books={books} searchCriteria={searchCriteria} addToCartCB={this.addToCart} />
+        {/* Cart */}
+        <View style={{height: 80, backgroundColor: '#00cc66'}}>
+          <Cart books={books} />
+        </View>
+
+        {/* BookList */}
+        <BookList books={books} searchCriteria={searchCriteria} addToCartCB={this.addToCart} removeFromCartCB={this.removeFromCart} />
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  heading: {
+
+  container: {
+    flex: 1,
+  },
+
+  title: {
     marginTop: 40,
     textAlign: 'center',
     fontSize: 40,
+    backgroundColor: '#0066ff',
+    color: 'white',
   },
+
   item: {
     padding: 10,
     fontSize: 18,
     height: 44,
   },
-  container: {
-    flex: 1,
+
+  itemInCart: {
+    padding: 10,
+    fontSize: 18,
+    height: 44,
+    color: '#000000',
   },
-  welcome: {
+
+  cartTitle: {
+    padding: 10,
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+
+  cartTotalContainer: {
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+  },
+
+  cartTotal: {
     fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+    padding: 10,
+    fontWeight: 'bold',
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+
 });
