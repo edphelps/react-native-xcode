@@ -60,7 +60,11 @@ const Cart = ({ books }) => {
    addToCartCB -- callback when user clicks to add book to cart, pass the book__id
 }
 *********************************************** */
-const BookList = ({ books, searchCriteria, addToCartCB, removeFromCartCB }) => {
+const BookList = ({
+  books,
+  searchCriteria,
+  addToCartCB,
+  removeFromCartCB }) => {
 
   /* **********************************
   *  onPressBuy()
@@ -78,6 +82,15 @@ const BookList = ({ books, searchCriteria, addToCartCB, removeFromCartCB }) => {
     console.log('----------------------');
     console.log('onOPressReturn, id:', id);
     removeFromCartCB(id);
+  }
+
+  /* **********************************
+  *  onPressBook()
+  ************************************* */
+  onPressBook = (e, id) => {
+    console.log('----------------------');
+    console.log('onOPressBook, id:', id);
+    // setExpandedBookCB(id);
   }
 
   /* **********************************
@@ -101,10 +114,10 @@ const BookList = ({ books, searchCriteria, addToCartCB, removeFromCartCB }) => {
         renderItem={({item}) => (
           <View style={{flex: 1, flexDirection: 'row'}}>
             {(item.inCart)
-              ? (<Button onPress={(e) => onPressReturn(e, item.id)} color="#000000" title="---"/>)
+              ? (<Button onPress={(e) => onPressReturn(e, item.id)} color="#000000" title="--- "/>)
               : (<Button onPress={(e) => onPressBuy(e, item.id)} color="#000099" title="Buy"/>)}
 
-            <Text style={styles.item}>{item.title}</Text>
+            <Text style={styles.item} onPress={(e) => onPressBook(e, item.id)} >{item.title}</Text>
           </View>
         )}
         keyExtractor={(item, index) => Number(item.id).toString()}
@@ -264,7 +277,7 @@ export default class App extends Component<Props> {
   *  id -- book id
   ************************************* */
   removeFromCart = async (id) => {
-    console.log('App:removeFromart()');
+    console.log('App:removeFromCart()');
     const response = await fetch(`http://localhost:8082/api/books/cart/remove/${id}`, {
       method: 'PATCH',
       body: '',
@@ -318,17 +331,17 @@ const styles = StyleSheet.create({
   },
 
   item: {
-    padding: 10,
+    padding: 8,
     fontSize: 18,
     height: 44,
   },
 
-  itemInCart: {
-    padding: 10,
-    fontSize: 18,
-    height: 44,
-    color: '#000000',
-  },
+  // itemInCart: {
+  //   padding: 10,
+  //   fontSize: 18,
+  //   height: 44,
+  //   color: '#000000',
+  // },
 
   cartTitle: {
     padding: 10,
