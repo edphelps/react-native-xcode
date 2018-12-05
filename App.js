@@ -29,6 +29,15 @@ const BookList = ({ books, searchCriteria, addToCartCB }) => {
   /* **********************************
   *  render()
   ************************************* */
+  onPressBuy = (e, id) => {
+    console.log('----------------------');
+    console.log('onOPressBuy, id:', id);
+    addToCartCB(id);
+  }
+
+  /* **********************************
+  *  render()
+  ************************************* */
   console.log('BookList::render()');
 
   // short circuit: still loading
@@ -46,7 +55,7 @@ const BookList = ({ books, searchCriteria, addToCartCB }) => {
         data={books}
         renderItem={({item}) => (
           <View style={{flex: 1, flexDirection: 'row'}}>
-            <Button title="Buy"/>
+            <Button onPress={(e) => onPressBuy(e, item.id)} title="Buy"/>
             <Text style={styles.item}>{item.title}</Text>
           </View>
         )}
