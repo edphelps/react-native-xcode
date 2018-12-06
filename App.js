@@ -53,6 +53,29 @@ const Cart = ({ books }) => {
 };
 
 /* ********************************************
+*  BookDetails
+*********************************************** */
+const BookDetails = ({ book }) => {
+  console.log("-- BookDetails::render()");
+
+  if (!book)
+    return (
+      <Text>no book to show details for??</Text>
+    );
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.bookDetails}>{book.subtitle}</Text>
+      <Text style={styles.bookDetails}>by {book.author}</Text>
+      <Text style={styles.bookDetails}>{formatDollars(book.price)}, {book.pages} pages</Text>
+      <Text style={styles.bookDetails}>{book.publisher}, {new Date(book.published).toLocaleString('en-US', { year: '2-digit', month: '2-digit', day: '2-digit' })}</Text>
+      <Text style={styles.bookDetails}>{book.description}</Text>
+      <Text style={styles.bookDetails}>{book.website}</Text>
+    </View>
+  );
+};
+
+/* ********************************************
 *  BookList
    Displays list of books that match the search criteria and aren't in the cart
    books -- see App state
@@ -95,22 +118,22 @@ class BookList extends Component {
   *  Toggles whether to show book expanded details
   ************************************* */
   onPressBook = (e, id) => {
-    console.log('----------------------');
+    // console.log('----------------------');
     console.log('onOPressBook, id:', id);
 
     const newSet = new Set(this.state.expandedBookIdsSet);
-    console.log('==============================')
-    console.log('state: ', this.state.expandedBookIdsSet)
-    console.log('==============================')
-    console.log('copied newSet: ', newSet)
-    console.log('==============================')
+    // console.log('==============================')
+    // console.log('state: ', this.state.expandedBookIdsSet)
+    // console.log('==============================')
+    // console.log('copied newSet: ', newSet)
+    // console.log('==============================')
     if (newSet.has(id))
       newSet.delete(id);
     else
       newSet.add(id);
-    console.log('-----------------------------------------')
-    console.log('newSet: ', newSet)
-    console.log('-----------------------------------------')
+    // console.log('-----------------------------------------')
+    // console.log('newSet: ', newSet)
+    // console.log('-----------------------------------------')
     this.setState({
       expandedBookIdsSet: newSet,
       });
@@ -121,7 +144,7 @@ class BookList extends Component {
   *  Checks if the book is in expanded state
   ************************************* */
   isBookExpanded(id) {
-    console.log('***** isBookExpanded, ', id);
+    // console.log('***** isBookExpanded, ', id);
     return this.state.expandedBookIdsSet.has(id);
   }
 
@@ -137,90 +160,42 @@ class BookList extends Component {
         <Text>Loading book list...</Text>
       );
     }
-    console.log("=============  &&&&&&&&&& ==========")
-    console.log(this.props.books)
-    console.log("=======================")
+    // console.log("=======================")
+    // console.log(this.props.books)
+    // console.log("=======================")
     return (
       <View style={styles.container}>
+
         <FlatList
+
           data={this.props.books}
+
           extraData={this.state.expandedBookIdsSet}
+
           renderItem={({item}) => (
-            <View style={{flex: 1, flexDirection: 'row'}}>
+            <View style={{flex: 1, marginTop: 8, flexDirection: 'row'}}>
 
               {(item.inCart)
-                ? (<Button onPress={(e) => this.onPressReturn(e, item.id)} color="#000000" title="--- "/>)
+                ? (<Button onPress={(e) => this.onPressReturn(e, item.id)} color="#000000" title="cart"/>)
                 : (<Button onPress={(e) => this.onPressBuy(e, item.id)} color="#000099" title="Buy"/>)}
+
               <View>
                 <TouchableOpacity onPress={(e) => this.onPressBook(e, item.id)}>
-                  <Text style={styles.item}  >{item.title}</Text>
+                  <Text style={styles.bookTitle}  >{item.title}</Text>
                 </TouchableOpacity>
                 {(this.isBookExpanded(item.id))
-                  ? (<Text>Expanded</Text>)
-                  : (<Text>---</Text>)}
+                  ? (<BookDetails book={item} />)
+                  : null}
               </View>
             </View>
           )}
+
           keyExtractor={(item, index) => Number(item.id).toString()}
+
         />
       </View>
     )
   }
-
-  // let filteredBooks = [...books];
-  //
-  // // Apply search criteria
-  // if (searchCriteria) {
-  //   filteredBooks = filteredBooks.filter((book) => {
-  //     switch (searchCriteria.authorOrTitle) {
-  //       case 'author':
-  //         return book.author.toLowerCase().startsWith(searchCriteria.text.toLowerCase());
-  //       case 'title':
-  //         return book.title.toLowerCase().startsWith(searchCriteria.text.toLowerCase());
-  //       default:
-  //         console.log('ERROR: bad searchCriteria.authorOrTitle: ', searchCriteria.authorOrTitle);
-  //         return false;
-  //     }
-  //   });
-  // };
-  //
-  // // short circuit: no books match search
-  // if (!filteredBooks.length) {
-  //   return (
-  //     <div className="container">
-  //     <h3>No books match the search</h3>
-  //     </div>
-  //   );
-  // }
-  //
-  // // filter out books already in the cart
-  // filteredBooks = filteredBooks.filter(book => !book.inCart);
-  //
-  // // short circuit: no books to display
-  // if (!filteredBooks.length) {
-  //   return (
-  //     <div className="container">
-  //       <h3>You bought everything!</h3>
-  //     </div>
-  //   );
-  // }
-  //
-  // // sort by title
-  // filteredBooks.sort((a, b) => {
-  //   if (a.title < b.title) return -1;
-  //   if (a.title > b.title) return 1;
-  //   return 0;
-  // });
-  //
-  // // render
-  // return (
-  //   <div className="container">
-  //     <h3 className="text-center">Select a title to purchase</h3>
-  //     <div className="list-group">
-  //       { filteredBooks.map(book => <BookRowContainer key={book.id} book={book} addToCartCB={addToCartCB} />) }
-  //     </div>
-  //   </div>
-  // );
 };
 
 /* *******************************************************
@@ -396,10 +371,26 @@ const styles = StyleSheet.create({
     color: 'white',
   },
 
-  item: {
-    padding: 8,
+  bookTitle: {
+    // paddingTop: 14,
+    // paddingLeft: 8,
+    // paddingRight: 8,
+    // paddingBottom: 2,
+
+    marginTop: 9,
     fontSize: 18,
-    height: 44,
+    // height: 44,
+    // backgroundColor: 'lightblue',
+  },
+
+  bookDetails: {
+    fontSize: 13,
+    padding: 0,
+    marginTop: 3,
+    marginLeft: 0,
+    marginRight: 50,
+    // fontWeight: 'bold',
+    // backgroundColor: 'pink',
   },
 
   // itemInCart: {
