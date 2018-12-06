@@ -199,13 +199,19 @@ class BookList extends Component {
     // console.log("=======================")
     // console.log(this.props.books)
     // console.log("=======================")
+    let booksToDisplay = [];
+    searchCriteria = this.props.searchCriteria;
+    if (searchCriteria.text.length) {
+      booksToDisplay = this.props.books.filter(book => book.title.toLowerCase().startsWith(searchCriteria.text.toLowerCase()));
+    } else {
+      booksToDisplay = this.props.books;
+    }
     return (
       <View style={styles.container}>
 
         <FlatList
 
-          data={this.props.books}
-
+          data={booksToDisplay}
           extraData={this.state.expandedBookIdsSet}
 
           renderItem={({item}) => (
@@ -244,8 +250,8 @@ export default class App extends Component<Props> {
     searchCriteria: {
       text: '',
       authorOrTitle: 'author', // "title"
-      books: null,
     },
+    books: null,
     // ----------------
     // DON'T DELETE!!!!
     // ----------------
@@ -377,6 +383,9 @@ export default class App extends Component<Props> {
   filterChanged = (sFilter) => {
     console.log('App:filterChanged()');
     console.log('>>>> ', sFilter);
+    newCriteria = this.state.searchCriteria;
+    newCriteria.text = sFilter;
+    this.setState({ searchCriteria: newCriteria });
   }
 
 
@@ -433,6 +442,7 @@ const styles = StyleSheet.create({
 
     marginTop: 9,
     fontSize: 18,
+    marginRight: 50,
     // height: 44,
     // backgroundColor: 'lightblue',
   },
