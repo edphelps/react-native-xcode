@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, FlatList, Button} from 'react-native';
+import {Platform, StyleSheet, Text, View, FlatList, Button, TouchableOpacity} from 'react-native';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -60,12 +60,7 @@ const Cart = ({ books }) => {
    addToCartCB -- callback when user clicks to add book to cart, pass the book__id
 }
 *********************************************** */
-// const BookList = ({
 class BookList extends Component {
-  // books,
-  // searchCriteria,
-  // addToCartCB,
-  // removeFromCartCB }) => {
 
   /* **********************************
   *  constructor
@@ -73,7 +68,7 @@ class BookList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      expandedBookIds: new Set(),
+      expandedBookIdsSet: new Set(),
     };
   }
 
@@ -97,11 +92,37 @@ class BookList extends Component {
 
   /* **********************************
   *  onPressBook()
+  *  Toggles whether to show book expanded details
   ************************************* */
   onPressBook = (e, id) => {
     console.log('----------------------');
     console.log('onOPressBook, id:', id);
-    // setExpandedBookCB(id);
+
+    const newSet = new Set(this.state.expandedBookIdsSet);
+    console.log('==============================')
+    console.log('state: ', this.state.expandedBookIdsSet)
+    console.log('==============================')
+    console.log('copied newSet: ', newSet)
+    console.log('==============================')
+    if (newSet.has(id))
+      newSet.delete(id);
+    else
+      newSet.add(id);
+    console.log('-----------------------------------------')
+    console.log('newSet: ', newSet)
+    console.log('-----------------------------------------')
+    this.setState({
+      expandedBookIdsSet: newSet,
+      });
+  }
+
+  /* **********************************
+  *  isBookExpanded()
+  *  Checks if the book is in expanded state
+  ************************************* */
+  isBookExpanded(id) {
+    console.log('***** isBookExpanded, ', id);
+    return this.state.expandedBookIdsSet.has(id);
   }
 
   /* **********************************
@@ -116,23 +137,28 @@ class BookList extends Component {
         <Text>Loading book list...</Text>
       );
     }
-    console.log("=======================")
+    console.log("=============  &&&&&&&&&& ==========")
     console.log(this.props.books)
     console.log("=======================")
     return (
       <View style={styles.container}>
         <FlatList
           data={this.props.books}
+          extraData={this.state.expandedBookIdsSet}
           renderItem={({item}) => (
             <View style={{flex: 1, flexDirection: 'row'}}>
 
               {(item.inCart)
                 ? (<Button onPress={(e) => this.onPressReturn(e, item.id)} color="#000000" title="--- "/>)
                 : (<Button onPress={(e) => this.onPressBuy(e, item.id)} color="#000099" title="Buy"/>)}
-
-              <Text style={styles.item} onPress={(e) => this.onPressBook(e, item.id)} >{item.title}</Text>
-
-
+              <View>
+                <TouchableOpacity onPress={(e) => this.onPressBook(e, item.id)}>
+                  <Text style={styles.item}  >{item.title}</Text>
+                </TouchableOpacity>
+                {(this.isBookExpanded(item.id))
+                  ? (<Text>Expanded</Text>)
+                  : (<Text>---</Text>)}
+              </View>
             </View>
           )}
           keyExtractor={(item, index) => Number(item.id).toString()}
@@ -284,7 +310,19 @@ export default class App extends Component<Props> {
     });
     const json = await response.json();
     console.log('resulting json: ' + json);
-    this.loadBooks();
+
+    const newBooks = this.state.books.map((book) => {
+      if (book.id === id) {
+        const newBook = {...book};
+        newBook.inCart = true;
+        return newBook;
+      }
+      return book;
+      });
+    this.setState({
+      books: newBooks,
+    });
+    // this.loadBooks();
   }
 
   /* **********************************
@@ -304,7 +342,19 @@ export default class App extends Component<Props> {
     });
     const json = await response.json();
     console.log('resulting json: ' + json);
-    this.loadBooks();
+
+    const newBooks = this.state.books.map((book) => {
+      if (book.id === id) {
+        const newBook = {...book};
+        newBook.inCart = false;
+        return newBook;
+      }
+      return book;
+      });
+    this.setState({
+      books: newBooks,
+    });
+    // this.loadBooks();
   }
 
   /* **********************************
