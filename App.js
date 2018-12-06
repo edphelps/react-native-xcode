@@ -7,7 +7,8 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, FlatList, Button, TouchableOpacity} from 'react-native';
+import {Platform, StyleSheet, Text, View, FlatList, Button,
+        TouchableOpacity, TextInput } from 'react-native';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -51,6 +52,41 @@ const Cart = ({ books }) => {
     </View>
   );
 };
+
+/* ********************************************
+*  Filter
+*********************************************** */
+const Filter = ({ filterChangedCB }) => {
+  console.log("-- Filter::render()");
+
+  return (
+    <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor:'#ff9999'}}>
+
+      <View>
+        <Text style={styles.filterLabel}>Filter:</Text>
+      </View>
+
+      <View>
+        <TextInput
+              autoFocus
+              style={styles.filterInput}
+              placeholder="book title"
+              onChangeText={(text) => filterChangedCB(text)} />
+      </View>
+    </View>
+  )
+  // return (
+  //   <View style={{flex: 1, backgroundColor:'pink'}}>
+  //     <View style={{flex: 1, backgroundColor:'purple'}}>
+  //       <Text style={styles.filterLabel}>Filter: </Text>
+  //       <TextInput
+  //             style={{height: 40}}
+  //             placeholder="book title"
+  //             onChangeText={(text) => filterChangedCB(text)} />
+  //     </View>
+  //   </View>
+  // )
+}
 
 /* ********************************************
 *  BookDetails
@@ -208,6 +244,7 @@ export default class App extends Component<Props> {
     searchCriteria: {
       text: '',
       authorOrTitle: 'author', // "title"
+      books: null,
     },
     // ----------------
     // DON'T DELETE!!!!
@@ -333,6 +370,17 @@ export default class App extends Component<Props> {
   }
 
   /* **********************************
+  *  filterChanged()
+  *  Called as user types in the
+  *  id -- book id
+  ************************************* */
+  filterChanged = (sFilter) => {
+    console.log('App:filterChanged()');
+    console.log('>>>> ', sFilter);
+  }
+
+
+  /* **********************************
   *  render
   ************************************* */
   render() {
@@ -348,6 +396,12 @@ export default class App extends Component<Props> {
         {/* Cart */}
         <View style={{height: 80, backgroundColor: '#00cc66'}}>
           <Cart books={books} />
+        </View>
+
+        {/* Filter */}
+
+        <View style={{height: 50, backgroundColor: '#00cc66'}}>
+          <Filter filterChangedCB={this.filterChanged}/>
         </View>
 
         {/* BookList */}
@@ -399,6 +453,19 @@ const styles = StyleSheet.create({
   //   height: 44,
   //   color: '#000000',
   // },
+
+
+  filterLabel: {
+    padding: 10,
+    fontSize: 18,
+    // fontWeight: 'bold',
+  },
+  filterInput: {
+    padding: 10,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
 
   cartTitle: {
     padding: 10,
