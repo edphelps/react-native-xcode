@@ -60,11 +60,22 @@ const Cart = ({ books }) => {
    addToCartCB -- callback when user clicks to add book to cart, pass the book__id
 }
 *********************************************** */
-const BookList = ({
-  books,
-  searchCriteria,
-  addToCartCB,
-  removeFromCartCB }) => {
+// const BookList = ({
+class BookList extends Component {
+  // books,
+  // searchCriteria,
+  // addToCartCB,
+  // removeFromCartCB }) => {
+
+  /* **********************************
+  *  constructor
+  ************************************* */
+  constructor(props) {
+    super(props);
+    this.state = {
+      expandedBookIds: new Set(),
+    };
+  }
 
   /* **********************************
   *  onPressBuy()
@@ -72,7 +83,7 @@ const BookList = ({
   onPressBuy = (e, id) => {
     console.log('----------------------');
     console.log('onOPressBuy, id:', id);
-    addToCartCB(id);
+    this.props.addToCartCB(id);
   }
 
   /* **********************************
@@ -81,7 +92,7 @@ const BookList = ({
   onPressReturn = (e, id) => {
     console.log('----------------------');
     console.log('onOPressReturn, id:', id);
-    removeFromCartCB(id);
+    this.props.removeFromCartCB(id);
   }
 
   /* **********************************
@@ -96,34 +107,39 @@ const BookList = ({
   /* **********************************
   *  render()
   ************************************* */
-  console.log('BookList::render()');
+  render() {
+    console.log('BookList::render()');
 
-  // short circuit: still loading
-  if (!books) {
+    // short circuit: still loading
+    if (!this.props.books) {
+      return (
+        <Text>Loading book list...</Text>
+      );
+    }
+    console.log("=======================")
+    console.log(this.props.books)
+    console.log("=======================")
     return (
-      <Text>Loading book list...</Text>
-    );
-  }
-  console.log("=======================")
-  console.log(books)
-  console.log("=======================")
-  return (
-    <View style={styles.container}>
-      <FlatList
-        data={books}
-        renderItem={({item}) => (
-          <View style={{flex: 1, flexDirection: 'row'}}>
-            {(item.inCart)
-              ? (<Button onPress={(e) => onPressReturn(e, item.id)} color="#000000" title="--- "/>)
-              : (<Button onPress={(e) => onPressBuy(e, item.id)} color="#000099" title="Buy"/>)}
+      <View style={styles.container}>
+        <FlatList
+          data={this.props.books}
+          renderItem={({item}) => (
+            <View style={{flex: 1, flexDirection: 'row'}}>
 
-            <Text style={styles.item} onPress={(e) => onPressBook(e, item.id)} >{item.title}</Text>
-          </View>
-        )}
-        keyExtractor={(item, index) => Number(item.id).toString()}
-      />
-    </View>
-  );
+              {(item.inCart)
+                ? (<Button onPress={(e) => this.onPressReturn(e, item.id)} color="#000000" title="--- "/>)
+                : (<Button onPress={(e) => this.onPressBuy(e, item.id)} color="#000099" title="Buy"/>)}
+
+              <Text style={styles.item} onPress={(e) => this.onPressBook(e, item.id)} >{item.title}</Text>
+
+
+            </View>
+          )}
+          keyExtractor={(item, index) => Number(item.id).toString()}
+        />
+      </View>
+    )
+  }
 
   // let filteredBooks = [...books];
   //
