@@ -75,17 +75,6 @@ const Filter = ({ filterChangedCB }) => {
       </View>
     </View>
   )
-  // return (
-  //   <View style={{flex: 1, backgroundColor:'pink'}}>
-  //     <View style={{flex: 1, backgroundColor:'purple'}}>
-  //       <Text style={styles.filterLabel}>Filter: </Text>
-  //       <TextInput
-  //             style={{height: 40}}
-  //             placeholder="book title"
-  //             onChangeText={(text) => filterChangedCB(text)} />
-  //     </View>
-  //   </View>
-  // )
 }
 
 /* ********************************************
@@ -206,13 +195,14 @@ class BookList extends Component {
     } else {
       booksToDisplay = this.props.books;
     }
+    
     return (
       <View style={styles.container}>
 
         <FlatList
+          extraData={this.state.expandedBookIdsSet}
 
           data={booksToDisplay}
-          extraData={this.state.expandedBookIdsSet}
 
           renderItem={({item}) => (
             <View style={{flex: 1, marginTop: 8, flexDirection: 'row'}}>
